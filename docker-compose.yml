@@ -1,0 +1,68 @@
+version: '3.0'
+
+services:
+  myeurekaserver:
+    container_name: myeurekaserver
+    build:
+      context: ./eureka-server
+      dockerfile: Dockerfile
+    ports:
+    -  "8761:8761"
+     
+  productmodule:
+    container_name: productmodule
+    build:
+      context: ./ProductsModule
+      dockerfile: Dockerfile
+    environment:
+    - eureka.client.service-url.defaultZone=http://myeurekaserver:8761/eureka/
+    - eureka.instance.prefer-ip-address=true
+    - spring.datasource.url=jdbc:h2:mem:mfpe
+    - spring.datasource.password=root
+    - spring.datasource.username==root
+    - spring.datasource.driver-class-name=org.h2.Driver
+
+    depends_on:
+    - myeurekaserver
+    ports:
+    - "8080:8080"
+
+
+  cartmodule:
+    container_name: cartmodule
+    build:
+      context: ./CartModule
+      dockerfile: Dockerfile
+    environment:
+    - eureka.client.service-url.defaultZone=http://myeurekaserver:8761/eureka/
+    - eureka.instance.prefer-ip-address=true
+    - spring.datasource.url=jdbc:h2:mem:mfpe
+    - spring.datasource.password=root
+    - spring.datasource.username==root
+    - spring.datasource.driver-class-name=org.h2.Driver
+    depends_on:
+    - myeurekaserver
+    - productmodule
+
+    ports:
+    - "8002:8002"
+
+  vendormodule:
+    container_name: vendormodule
+    build:
+      context: ./VendorModule
+      dockerfile: Dockerfile
+    environment:
+    - eureka.client.service-url.defaultZone=http://myeurekaserver:8761/eureka/
+    - eureka.instance.prefer-ip-address=true
+    - spring.datasource.url=jdbc:h2:mem:mfpe
+    - spring.datasource.password=root
+    - spring.datasource.username==root
+    - spring.datasource.driver-class-name=org.h2.Driver
+    depends_on:
+    - myeurekaserver
+    - productmodule
+    - cartmodule
+    ports:
+    - "8003:8003"
+  
